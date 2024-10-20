@@ -144,18 +144,18 @@ def main():
     with st.form("delete_portfolio_form"):
         confirm_delete = st.checkbox("Confirm Delete Portfolio", key='confirm_delete_portfolio_main')
         delete_portfolio_button = st.form_submit_button("Delete Portfolio")
-        if delete_portfolio_button:
-            if confirm_delete:
-                tracker = PortfolioTracker(st.session_state.selected_portfolio)
-                success = tracker.delete_portfolio()
-                del tracker
-                if success:
-                    st.success(f"Portfolio '{st.session_state.selected_portfolio}' deleted.")
-                    st.rerun()
-                else:
-                    st.error("Failed to delete the portfolio.")
+    if delete_portfolio_button:
+        if confirm_delete:
+            tracker = PortfolioTracker(st.session_state.selected_portfolio)
+            success = tracker.delete_portfolio()
+            if success:
+                st.success(f"Portfolio '{st.session_state.selected_portfolio}' deleted.")
+                st.rerun()  # Force a rerun after successful deletion
             else:
-                st.warning("Please confirm deletion by checking the box.")
+                # Capture the specific error message from the terminal and display it in the app
+                st.error(f"Failed to delete the portfolio. Check terminal for more details.")
+        else:
+            st.warning("Please confirm deletion by checking the box.")
 
 
 if __name__ == '__main__':

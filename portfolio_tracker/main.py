@@ -8,9 +8,9 @@ from portfolio_tracker.utils import generate_transaction_id
 class PortfolioTracker:
     def __init__(self, portfolio_name):
         self.portfolio_name = portfolio_name
-        db_filename = f"{portfolio_name}.db"
-        db_path = f"sqlite:///data/{db_filename}"
-        self.engine = get_engine(db_path)
+        self.db_filename = f"{portfolio_name}.db"
+        self.db_path = f"sqlite:///data/{self.db_filename}"
+        self.engine = get_engine(self.db_path)
         self.session = get_session(self.engine)
 
     def add_transaction(self, date_time, input_ticker_or_isin, amount):
@@ -62,32 +62,23 @@ class PortfolioTracker:
         else:
             return False
 
-    def delete_portfolio(self):
-        # Fermer la session et l'engine
+    def close(self):
         self.session.close()
         self.engine.dispose()
 
-        # Supprimer les références
-        del self.session
-        del self.engine
-
-        # Forcer le garbage collector
-        import gc
-        gc.collect()
-
-        # Supprimer le fichier de base de données
-        db_filename = f"{self.portfolio_name}.db"
-        db_path = os.path.join('data', db_filename)
-
-        if os.path.exists(db_path):
-            try:
-                os.remove(db_path)
+    def delete_portfolio(self):
+        try:
+            # Close the session and dispose of the engine
+            self.close()
+            
+            # Now safely delete the database file
+            if os.path.exists(self.db_path):
+                os.remove(self.db_path)
                 return True
-            except Exception as e:
-                print(f"Erreur lors de la suppression du fichier de base de données : {e}")
+            else:
                 return False
-        else:
-            print("Le fichier de base de données n'existe pas.")
+        except Exception as e:
+            print(f"Error deleting database file: {e}")
             return False
 
 
