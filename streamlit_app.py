@@ -78,7 +78,7 @@ def main():
         date = st.date_input("Date", value=datetime.now().date())
         time_input = st.time_input("Time", value=datetime.now().time())
         ticker_or_isin = st.text_input("Ticker/ISIN")
-        amount = st.number_input("Amount Invested", min_value=0.0, format="%.2f")
+        amount = st.number_input("Amount Invested", min_value=0.01, format="%.2f")  # Montant minimal mis à jour
         submit = st.form_submit_button("Add Transaction")
         if submit:
             date_time = datetime.combine(date, time_input)

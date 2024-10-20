@@ -14,6 +14,10 @@ class PortfolioTracker:
         self.session = get_session(self.engine)
 
     def add_transaction(self, date_time, input_ticker_or_isin, amount):
+        # Vérifier que le montant est strictement positif
+        if amount <= 0:
+            raise ValueError("The amount invested must be strictly positive.")
+        
         ticker = get_ticker_from_input(input_ticker_or_isin)
         if not ticker:
             raise ValueError("Ticker or ISIN not found.")
