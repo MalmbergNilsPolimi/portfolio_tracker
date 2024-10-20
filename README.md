@@ -1,53 +1,107 @@
 # Portfolio Tracker
 
-Portfolio Tracker is a Python module to manage your investment portfolio in stocks, ETFs, and cryptocurrencies. It allows you to track your investments, calculate gains and losses, and visualize your portfolio performance with a clean and professional interface using Streamlit.
+Portfolio Tracker is a Python-based module designed to help you manage and track your investments in ETFs, stocks, and cryptocurrencies. The tool provides a detailed transaction history, real-time portfolio updates, and calculates gains and losses for each investment. It includes an intuitive graphical interface built using Streamlit, making it easy to monitor the performance of your portfolio over time.
 
 ## Features
 
-- **Transaction Tracking**: Input transactions with date, time, ISIN or ticker, and amount. The module updates your portfolio by fetching the necessary data (product price at the date and time of purchase) using Yahoo Finance tools.
+- **Transaction Tracking**: 
+  - Add and manage transactions with details like date, time, asset ticker/ISIN, and investment amount.
+  - Automatically fetch the historical price of assets at the time of the transaction using Yahoo Finance.
+  
+- **Real-Time Portfolio Updates**: 
+  - View the current status of your portfolio, including the total invested amount and gains/losses per asset.
+  - Track each transaction's performance and cumulative gains/losses across all transactions for the same asset.
 
-- **Real-time Updates**: Visualize your portfolio at any time, see the list of transactions (with invested amount and percentage gain/loss since investment), the total amount invested in each ISIN (with total gain/loss).
+- **Database Management**: 
+  - Store all transaction data in an integrated SQLite database.
+  - Import/export transaction data in CSV format.
+  - Manage multiple portfolios separately within the application.
 
-- **Gain/Loss Calculation per Transaction**: For multiple transactions on the same asset at different dates, the module calculates the total invested and cumulative gains/losses. It also indicates the gains/losses associated with each specific transaction. Each transaction has a unique identifier for easy retrieval.
+- **Intuitive Interface**:
+  - An easy-to-use Streamlit interface for adding, viewing, and managing your portfolios and transactions.
+  - Visualize the performance of your portfolio in real-time.
 
-- **Integrated Database**: Includes a database to store all information, with the ability to export and import data in .csv files. Manage one or more portfolios separately.
+## Project Structure
 
-- **Graphical Interface**: An intuitive interface using Streamlit to follow your portfolio performance.
+```
+portfolio_tracker/
+│   .gitignore
+│   README.md
+│   requirements.txt
+│   streamlit_app.py
+│
+├── data/
+│   └── Portfolio databases (*.db)
+│
+└── portfolio_tracker/
+    ├── database.py
+    ├── finance_data.py
+    ├── main.py
+    ├── models.py
+    ├── utils.py
+    └── __init__.py
+```
+
+- **`streamlit_app.py`**: The main file that runs the Streamlit application, providing the user interface.
+- **`portfolio_tracker/database.py`**: Handles database connections and setup using SQLAlchemy.
+- **`portfolio_tracker/finance_data.py`**: Fetches financial data from Yahoo Finance.
+- **`portfolio_tracker/main.py`**: The core logic for managing portfolios and transactions.
+- **`portfolio_tracker/models.py`**: Defines the SQLAlchemy models for the database.
+- **`portfolio_tracker/utils.py`**: Provides utility functions like generating unique transaction IDs.
 
 ## Installation
 
-1. **Clone the repository:**
+1. Clone the repository:
 
    ```bash
-   git clone https://github.com/yourusername/portfolio_tracker.git
+   git clone https://github.com/MalmbergNilsPolimi/portfolio_tracker.git
+   cd portfolio_tracker
+   ```
+
+2. Install the required Python packages:
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. Run the Streamlit application:
+
+   ```bash
+   python streamlit_app.py
+   ```
 
 ## Usage
 
-### Running the Streamlit App
+### 1. Create a Portfolio
+- Enter a name for your portfolio in the Streamlit sidebar and click "Create New Portfolio".
+  
+### 2. Add Transactions
+- Enter the date, time, ticker (or ISIN), and the amount for each transaction. The system will automatically fetch the price at the specified date and time.
 
-You can now start the Streamlit interface by simply running:
+### 3. View Portfolio
+- Once transactions are added, view the real-time value of your portfolio, including the gain/loss for each transaction.
 
-```bash
-python streamlit_app.py
+### 4. Delete Transactions/Portfolios
+- Manage your portfolio by removing transactions or entire portfolios from the interface.
 
+## Requirements
 
-## Gestion de plusieurs portefeuilles
+- Python 3.7 or higher
+- Streamlit
+- yfinance
+- YahooQuery
+- SQLAlchemy
 
-L'application permet désormais de gérer plusieurs portefeuilles avec des bases de données séparées pour chacun.
+For a complete list of dependencies, refer to `requirements.txt`.
 
-### Création d'un nouveau portefeuille
+## Contributing
 
-- Dans la barre latérale, entrez le nom du nouveau portefeuille dans le champ "New Portfolio Name".
-- Cliquez sur "Create New Portfolio".
-- Le nouveau portefeuille sera automatiquement sélectionné.
+Contributions are welcome! Feel free to submit a pull request or open an issue if you have suggestions or find bugs.
 
-### Sélection d'un portefeuille existant
+## License
 
-- Dans la barre latérale, utilisez le menu déroulant "Select Portfolio" pour choisir un portefeuille existant.
-- Les données et transactions du portefeuille sélectionné seront affichées.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-### Remarques
+## Acknowledgements
 
-- Les portefeuilles sont stockés sous forme de fichiers de base de données SQLite dans le répertoire `data/`.
-- Chaque portefeuille est indépendant, avec ses propres transactions et performances.
-
+- This project makes use of the [Yahoo Finance](https://pypi.org/project/yfinance/) and [YahooQuery](https://pypi.org/project/yahooquery/) APIs for fetching financial data.
