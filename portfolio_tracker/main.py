@@ -1,9 +1,8 @@
-import os
 from datetime import datetime
-from .database import get_engine, get_session
-from .models import TransactionModel
-from .finance_data import get_price_at, get_current_price
-from .utils import generate_transaction_id
+from portfolio_tracker.database import get_engine, get_session
+from portfolio_tracker.models import TransactionModel
+from portfolio_tracker.finance_data import get_price_at, get_current_price, get_ticker_from_input
+from portfolio_tracker.utils import generate_transaction_id
 
 class PortfolioTracker:
     def __init__(self, portfolio_name):
@@ -13,11 +12,13 @@ class PortfolioTracker:
         self.engine = get_engine(db_path)
         self.session = get_session(self.engine)
 
-    def add_transaction(self, date_time, ticker, amount):
+    def add_transaction(self, date_time, input_ticker_or_isin, amount):
+        ticker = get_ticker_from_input(input_ticker_or_isin)
+        if not ticker:
+            raise ValueError("Ticker or ISIN not found.")
         price = get_price_at(ticker, date_time)
         if price is None:
             raise ValueError("Price data not available for the given date and time.")
-
         transaction_id = generate_transaction_id(ticker, date_time.date())
         transaction = TransactionModel(
             transaction_id=transaction_id,

@@ -1,7 +1,7 @@
 import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from .models import Base
+from portfolio_tracker.models import Base
 
 def get_engine(db_path):
     # Extraire le chemin du répertoire à partir de db_path

@@ -47,13 +47,13 @@ def main():
     with st.form("add_transaction"):
         date = st.date_input("Date", value=datetime.now().date())
         time_input = st.time_input("Time", value=datetime.now().time())
-        ticker = st.text_input("Ticker/ISIN")
+        ticker_or_isin = st.text_input("Ticker/ISIN")
         amount = st.number_input("Amount Invested", min_value=0.0, format="%.2f")
         submit = st.form_submit_button("Add Transaction")
         if submit:
             date_time = datetime.combine(date, time_input)
             try:
-                transaction = tracker.add_transaction(date_time, ticker, amount)
+                transaction = tracker.add_transaction(date_time, ticker_or_isin, amount)
                 st.success(f"Transaction {transaction.transaction_id} added.")
             except ValueError as e:
                 st.error(str(e))
@@ -77,7 +77,7 @@ def main():
             data.append({
                 'Transaction ID': t.transaction_id,
                 'Date': t.date.strftime("%Y-%m-%d %H:%M"),
-                'Ticker/ISIN': t.ticker,
+                'Ticker': t.ticker,
                 'Amount Invested': f"${t.amount:.2f}",
                 'Price at Purchase': f"${t.price:.2f}",
                 'Current Price': f"${current_price:.2f}",
