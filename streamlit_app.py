@@ -22,28 +22,55 @@ def main():
     if 'selected_portfolio' not in st.session_state:
         st.session_state.selected_portfolio = None
 
-    # Portfolio Selection
+    # Sidebar for portfolio selection
     st.sidebar.header("Portfolio Selection")
 
-    existing_portfolios = get_existing_portfolios()
-    selected_portfolio = st.sidebar.selectbox(
-        "Select Portfolio",
-        options=existing_portfolios,
-        key='selected_portfolio'
-    )
-
+    # Handle new portfolio creation BEFORE the selectbox
     new_portfolio_name = st.sidebar.text_input("New Portfolio Name")
     if st.sidebar.button("Create New Portfolio"):
         if new_portfolio_name:
+            existing_portfolios = get_existing_portfolios()
             if new_portfolio_name in existing_portfolios:
                 st.sidebar.error("Portfolio already exists.")
             else:
+                # Create the new portfolio by initializing it
+                tracker = PortfolioTracker(new_portfolio_name)
+                tracker.close()  # Close any connections
+                # Set the selected portfolio BEFORE the selectbox is instantiated
                 st.session_state.selected_portfolio = new_portfolio_name
                 st.sidebar.success(f"Portfolio '{new_portfolio_name}' created.")
+                st.rerun()  # Force rerun to update the selectbox with the new portfolio
         else:
             st.sidebar.error("Please enter a portfolio name.")
 
-    # FIXME - doesnt work
+    # Now get the updated list of existing portfolios
+    existing_portfolios = get_existing_portfolios()
+
+    # Check if there are any portfolios
+    if existing_portfolios:
+        # Determine the index of the selected portfolio
+        if st.session_state.selected_portfolio in existing_portfolios:
+            selected_index = existing_portfolios.index(st.session_state.selected_portfolio)
+        else:
+            selected_index = 0
+            st.session_state.selected_portfolio = existing_portfolios[0]
+
+        # Portfolio Selection
+        selected_portfolio = st.sidebar.selectbox(
+            "Select Portfolio",
+            options=existing_portfolios,
+            index=selected_index,
+            key='selected_portfolio'
+        )
+        # No need to assign st.session_state.selected_portfolio here; the selectbox handles it
+    else:
+        st.sidebar.write("No portfolios available. Please create a new portfolio.")
+        return
+
+    # Remove this line to avoid modifying session_state after widget instantiation
+    # st.session_state.selected_portfolio = selected_portfolio
+
+    # Handle portfolio deletion
     if st.sidebar.button("Delete Selected Portfolio"):
         confirm_delete = st.sidebar.checkbox("Confirm Delete Portfolio", key='confirm_delete_portfolio')
         if confirm_delete:
@@ -52,18 +79,15 @@ def main():
             del tracker
             if success:
                 st.sidebar.success(f"Portfolio '{st.session_state.selected_portfolio}' deleted.")
-                # Réinitialiser l'état de la session
-                del st.session_state['selected_portfolio']
-                # Forcer le rerun
-                st.experimental_set_query_params()  # Réinitialise les paramètres de l'URL
+                # Reset session state
+                st.session_state.selected_portfolio = None
                 st.rerun()
             else:
                 st.sidebar.error("Failed to delete the portfolio.")
         else:
             st.sidebar.warning("Please confirm deletion by checking the box.")
 
-
-
+    # Check if a portfolio is selected
     if not st.session_state.selected_portfolio:
         st.info("Please select or create a portfolio from the sidebar.")
         return
@@ -78,7 +102,7 @@ def main():
         date = st.date_input("Date", value=datetime.now().date())
         time_input = st.time_input("Time", value=datetime.now().time())
         ticker_or_isin = st.text_input("Ticker/ISIN")
-        amount = st.number_input("Amount Invested", min_value=0.0, format="%.2f")
+        amount = st.number_input("Amount Invested", min_value=0.01, format="%.2f")  # Montant minimal mis à jour
         submit = st.form_submit_button("Add Transaction")
         if submit:
             date_time = datetime.combine(date, time_input)
