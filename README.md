@@ -29,3 +29,25 @@ You can now start the Streamlit interface by simply running:
 
 ```bash
 python streamlit_app.py
+
+
+## Gestion de plusieurs portefeuilles
+
+L'application permet désormais de gérer plusieurs portefeuilles avec des bases de données séparées pour chacun.
+
+### Création d'un nouveau portefeuille
+
+- Dans la barre latérale, entrez le nom du nouveau portefeuille dans le champ "New Portfolio Name".
+- Cliquez sur "Create New Portfolio".
+- Le nouveau portefeuille sera automatiquement sélectionné.
+
+### Sélection d'un portefeuille existant
+
+- Dans la barre latérale, utilisez le menu déroulant "Select Portfolio" pour choisir un portefeuille existant.
+- Les données et transactions du portefeuille sélectionné seront affichées.
+
+### Remarques
+
+- Les portefeuilles sont stockés sous forme de fichiers de base de données SQLite dans le répertoire `data/`.
+- Chaque portefeuille est indépendant, avec ses propres transactions et performances.
+
