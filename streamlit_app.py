@@ -18,11 +18,19 @@ def get_existing_portfolios():
 def main():
     st.title("Portfolio Tracker")
 
+    # Initialize session state
+    if 'selected_portfolio' not in st.session_state:
+        st.session_state.selected_portfolio = None
+
     # Portfolio Selection
     st.sidebar.header("Portfolio Selection")
 
     existing_portfolios = get_existing_portfolios()
-    selected_portfolio = st.sidebar.selectbox("Select Portfolio", options=existing_portfolios)
+    selected_portfolio = st.sidebar.selectbox(
+        "Select Portfolio",
+        options=existing_portfolios,
+        key='selected_portfolio'
+    )
 
     new_portfolio_name = st.sidebar.text_input("New Portfolio Name")
     if st.sidebar.button("Create New Portfolio"):
@@ -30,15 +38,37 @@ def main():
             if new_portfolio_name in existing_portfolios:
                 st.sidebar.error("Portfolio already exists.")
             else:
-                selected_portfolio = new_portfolio_name
+                st.session_state.selected_portfolio = new_portfolio_name
                 st.sidebar.success(f"Portfolio '{new_portfolio_name}' created.")
         else:
             st.sidebar.error("Please enter a portfolio name.")
 
-    if not selected_portfolio:
+    # FIXME - doesnt work
+    if st.sidebar.button("Delete Selected Portfolio"):
+        confirm_delete = st.sidebar.checkbox("Confirm Delete Portfolio", key='confirm_delete_portfolio')
+        if confirm_delete:
+            tracker = PortfolioTracker(st.session_state.selected_portfolio)
+            success = tracker.delete_portfolio()
+            del tracker
+            if success:
+                st.sidebar.success(f"Portfolio '{st.session_state.selected_portfolio}' deleted.")
+                # Réinitialiser l'état de la session
+                del st.session_state['selected_portfolio']
+                # Forcer le rerun
+                st.experimental_set_query_params()  # Réinitialise les paramètres de l'URL
+                st.rerun()
+            else:
+                st.sidebar.error("Failed to delete the portfolio.")
+        else:
+            st.sidebar.warning("Please confirm deletion by checking the box.")
+
+
+
+    if not st.session_state.selected_portfolio:
         st.info("Please select or create a portfolio from the sidebar.")
         return
 
+    selected_portfolio = st.session_state.selected_portfolio
     tracker = PortfolioTracker(selected_portfolio)
     st.header(f"Portfolio: {selected_portfolio}")
 
@@ -70,7 +100,9 @@ def main():
     st.subheader("Transactions")
     transactions = tracker.get_transactions()
     if transactions:
+        # Display transactions and provide options to delete them
         data = []
+        transaction_ids = []
         for t in transactions:
             current_price = get_current_price(t.ticker)
             gain_loss = ((current_price - t.price) / t.price * 100) if t.price else 0
@@ -83,7 +115,19 @@ def main():
                 'Current Price': f"${current_price:.2f}",
                 'Gain/Loss (%)': f"{gain_loss:.2f}%"
             })
+            transaction_ids.append(t.transaction_id)
         st.table(data)
+
+        st.subheader("Delete Transactions")
+        selected_transactions = st.multiselect("Select Transactions to Delete", options=transaction_ids)
+        if st.button("Delete Selected Transactions"):
+            if selected_transactions:
+                for trans_id in selected_transactions:
+                    tracker.delete_transaction(trans_id)
+                st.success(f"Deleted transactions: {', '.join(selected_transactions)}")
+                st.rerun()
+            else:
+                st.warning("No transactions selected for deletion.")
     else:
         st.write("No transactions found.")
 

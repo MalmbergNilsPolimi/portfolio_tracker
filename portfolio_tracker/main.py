@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 from portfolio_tracker.database import get_engine, get_session
 from portfolio_tracker.models import TransactionModel
@@ -47,3 +48,46 @@ class PortfolioTracker:
             'current_value': current_value,
             'gain_loss_percent': gain_loss
         }
+
+    def delete_transaction(self, transaction_id):
+        transaction = self.session.query(TransactionModel).filter_by(transaction_id=transaction_id).first()
+        if transaction:
+            self.session.delete(transaction)
+            self.session.commit()
+            return True
+        else:
+            return False
+
+    def delete_portfolio(self):
+        # Fermer la session et l'engine
+        self.session.close()
+        self.engine.dispose()
+
+        # Supprimer les références
+        del self.session
+        del self.engine
+
+        # Forcer le garbage collector
+        import gc
+        gc.collect()
+
+        # Supprimer le fichier de base de données
+        db_filename = f"{self.portfolio_name}.db"
+        db_path = os.path.join('data', db_filename)
+
+        if os.path.exists(db_path):
+            try:
+                os.remove(db_path)
+                return True
+            except Exception as e:
+                print(f"Erreur lors de la suppression du fichier de base de données : {e}")
+                return False
+        else:
+            print("Le fichier de base de données n'existe pas.")
+            return False
+
+
+
+    def close(self):
+        self.session.close()
+        self.engine.dispose()
