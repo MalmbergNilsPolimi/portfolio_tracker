@@ -46,6 +46,10 @@ def main():
     # Now get the updated list of existing portfolios
     existing_portfolios = get_existing_portfolios()
 
+    # Check if the selected portfolio still exists
+    if st.session_state.selected_portfolio not in existing_portfolios:
+        st.session_state.selected_portfolio = None
+
     # Check if there are any portfolios
     if existing_portfolios:
         # Determine the index of the selected portfolio
@@ -66,26 +70,6 @@ def main():
     else:
         st.sidebar.write("No portfolios available. Please create a new portfolio.")
         return
-
-    # Remove this line to avoid modifying session_state after widget instantiation
-    # st.session_state.selected_portfolio = selected_portfolio
-
-    # Handle portfolio deletion
-    if st.sidebar.button("Delete Selected Portfolio"):
-        confirm_delete = st.sidebar.checkbox("Confirm Delete Portfolio", key='confirm_delete_portfolio')
-        if confirm_delete:
-            tracker = PortfolioTracker(st.session_state.selected_portfolio)
-            success = tracker.delete_portfolio()
-            del tracker
-            if success:
-                st.sidebar.success(f"Portfolio '{st.session_state.selected_portfolio}' deleted.")
-                # Reset session state
-                st.session_state.selected_portfolio = None
-                st.rerun()
-            else:
-                st.sidebar.error("Failed to delete the portfolio.")
-        else:
-            st.sidebar.warning("Please confirm deletion by checking the box.")
 
     # Check if a portfolio is selected
     if not st.session_state.selected_portfolio:
@@ -154,6 +138,25 @@ def main():
                 st.warning("No transactions selected for deletion.")
     else:
         st.write("No transactions found.")
+
+    # Delete Portfolio
+    st.subheader("Delete Portfolio")
+    with st.form("delete_portfolio_form"):
+        confirm_delete = st.checkbox("Confirm Delete Portfolio", key='confirm_delete_portfolio_main')
+        delete_portfolio_button = st.form_submit_button("Delete Portfolio")
+        if delete_portfolio_button:
+            if confirm_delete:
+                tracker = PortfolioTracker(st.session_state.selected_portfolio)
+                success = tracker.delete_portfolio()
+                del tracker
+                if success:
+                    st.success(f"Portfolio '{st.session_state.selected_portfolio}' deleted.")
+                    st.rerun()
+                else:
+                    st.error("Failed to delete the portfolio.")
+            else:
+                st.warning("Please confirm deletion by checking the box.")
+
 
 if __name__ == '__main__':
     import subprocess
